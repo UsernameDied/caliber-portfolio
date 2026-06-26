@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caliber — Video Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black: #080808;
+    --card: #0f0f0f;
+    --border: #1e1e1e;
+    --purple: #7F77DD;
+    --purple-dim: #534AB7;
+    --white: #ffffff;
+    --gray: #888780;
+    --gray-light: #b4b2a9;
+  }
+  body { background: var(--black); color: var(--white); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.5rem 2.5rem; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: rgba(8,8,8,0.92);
+    backdrop-filter: blur(12px); z-index: 100;
+  }
+  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.08em; color: var(--white); }
+  .nav-logo span { color: var(--purple); }
+  nav a { color: var(--gray); text-decoration: none; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+  nav a:hover { color: var(--white); }
+  .hero { padding: 6rem 2.5rem 5rem; max-width: 900px; margin: 0 auto; }
+  .hero-eyebrow {
+    font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--purple); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 10px;
+  }
+  .hero-eyebrow::before { content: ''; display: block; width: 28px; height: 1px; background: var(--purple); }
+  .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3.5rem, 8vw, 6.5rem); line-height: 0.95; letter-spacing: 0.02em; margin-bottom: 1.8rem; color: var(--white); }
+  .hero h1 em { font-style: normal; color: var(--purple); }
+  .hero-sub { font-size: 1rem; color: var(--gray-light); line-height: 1.7; max-width: 480px; margin-bottom: 2.5rem; }
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn { padding: 0.75rem 1.75rem; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; border-radius: 2px; cursor: pointer; text-decoration: none; transition: all 0.2s; border: none; font-family: 'Inter', sans-serif; }
+  .btn-primary { background: var(--purple); color: var(--white); }
+  .btn-primary:hover { background: var(--purple-dim); }
+  .btn-ghost { background: transparent; color: var(--gray-light); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--gray); color: var(--white); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2.5rem; border-top: 1px solid var(--border); }
+  .section-label {
+    font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--purple); margin-bottom: 2.5rem; display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .work-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  .work-tab {
+    padding: 0.6rem 1.2rem; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--gray); cursor: pointer; border-bottom: 2px solid transparent;
+    margin-bottom: -1px; transition: color 0.2s, border-color 0.2s; user-select: none;
+  }
+  .work-tab.active { color: var(--white); border-bottom-color: var(--purple); }
+  .work-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .work-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 4px;
+    overflow: hidden; transition: border-color 0.2s, transform 0.2s; cursor: pointer;
+    text-decoration: none; display: block;
+  }
+  .work-card:hover { border-color: var(--purple-dim); transform: translateY(-2px); }
+  .work-thumb { width: 100%; aspect-ratio: 16/9; background: #0d0d0d; display: flex; align-items: center; justify-content: center; }
+  .work-thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; }
+  .play-icon { width: 44px; height: 44px; border-radius: 50%; background: rgba(127,119,221,0.1); border: 1px solid var(--purple-dim); display: flex; align-items: center; justify-content: center; }
+  .play-icon svg { margin-left: 3px; }
+  .thumb-label { font-size: 0.7rem; color: var(--gray); letter-spacing: 0.1em; text-transform: uppercase; }
+  .work-info { padding: 1rem 1.1rem; }
+  .work-title { font-size: 0.9rem; font-weight: 500; color: var(--white); margin-bottom: 4px; }
+  .work-meta { font-size: 0.75rem; color: var(--gray); }
+  .work-tag { display: inline-block; padding: 2px 8px; border: 1px solid var(--purple-dim); border-radius: 2px; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--purple); margin-top: 6px; }
+  .add-card {
+    background: var(--card); border: 1px dashed var(--border); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    gap: 8px; padding: 2rem; cursor: pointer; transition: border-color 0.2s; min-height: 160px;
+  }
+  .add-card:hover { border-color: var(--purple-dim); }
+  .add-card span { font-size: 0.72rem; color: var(--gray); letter-spacing: 0.08em; text-transform: uppercase; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .about-row { display: grid; grid-template-columns: auto 1fr; gap: 3rem; align-items: start; }
+  .about-pfp-col { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
+  .pfp-frame {
+    width: 140px; height: 140px; border-radius: 50%; overflow: hidden;
+    border: 1px solid rgba(127,119,221,0.25); background: #111;
+  }
+  .pfp-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  .pfp-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.1em; color: var(--white); text-align: center; }
+  .pfp-role { font-size: 0.7rem; color: var(--purple); letter-spacing: 0.12em; text-transform: uppercase; text-align: center; margin-top: -10px; }
+  .about-text p { color: var(--gray-light); font-size: 0.95rem; line-height: 1.8; margin-bottom: 1rem; }
+  .stat-row { display: flex; gap: 2rem; margin-top: 1.8rem; padding-top: 1.5rem; border-top: 1px solid var(--border); align-items: center; }
+  .stat { border-left: 2px solid var(--purple-dim); padding-left: 1rem; }
+  .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--white); line-height: 1; margin-bottom: 2px; }
+  .stat-label { font-size: 0.7rem; color: var(--gray); letter-spacing: 0.06em; text-transform: uppercase; }
+  .ppro-stat { border-left: 2px solid var(--purple-dim); padding-left: 1rem; display: flex; flex-direction: column; gap: 4px; }
+  .ppro-logo { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 6px; background: #9999FF; }
+  .ppro-logo svg { width: 22px; height: 22px; }
+  .ppro-label { font-size: 0.7rem; color: var(--gray); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
+  .spec-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.2rem; }
+  .spec-pill { padding: 5px 12px; border: 1px solid var(--border); border-radius: 2px; font-size: 0.72rem; color: var(--gray-light); letter-spacing: 0.05em; }
+  footer { border-top: 1px solid var(--border); padding: 2rem 2.5rem; max-width: 900px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+  .footer-name { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.08em; color: var(--gray); }
+  .footer-note { font-size: 0.75rem; color: var(--gray); }
+  @media (max-width: 600px) {
+    .work-grid { grid-template-columns: 1fr; }
+    .about-row { grid-template-columns: 1fr; }
+    nav a { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">CALIBER<span>.</span></div>
+  <a href="#work">Work</a>
+  <a href="#about">About</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">Video Editor — Gaming & Short-form</div>
+  <h1>Edits that<br>actually get<br><em>watched.</em></h1>
+  <p class="hero-sub">Long-form gaming content and short-form edits with fast pacing, clean cuts, and attention to retention for creators who take their channel seriously.</p>
+  <div class="cta-row">
+    <a href="#work" class="btn btn-primary">View Work</a>
+    <a href="#about" class="btn btn-ghost">About Me</a>
+  </div>
+</section>
+
+<section class="section" id="work">
+  <div class="section-label">Recent work</div>
+  <div class="work-tabs">
+    <div class="work-tab active" onclick="switchTab('shorts', this)">Shorts & Reels</div>
+    <div class="work-tab" onclick="switchTab('longform', this)">Long-form</div>
+  </div>
+
+  <div id="tab-shorts" class="tab-panel active">
+    <div class="work-grid">
+      <a class="work-card" href="https://youtube.com/shorts/ubOuQ0ujVpY" target="_blank">
+        <div class="work-thumb">
+          <div class="work-thumb-placeholder">
+            <div class="play-icon"><svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M1 1L13 8L1 15V1Z" fill="#7F77DD"/></svg></div>
+            <span class="thumb-label">Watch on YouTube</span>
+          </div>
+        </div>
+        <div class="work-info">
+          <div class="work-title">Short-form Edit #1</div>
+          <div class="work-meta">YouTube Short · Gaming</div>
+          <div class="work-tag">Short-form</div>
+        </div>
+      </a>
+      <a class="work-card" href="https://youtube.com/shorts/3uBACBgX7wY" target="_blank">
+        <div class="work-thumb">
+          <div class="work-thumb-placeholder">
+            <div class="play-icon"><svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M1 1L13 8L1 15V1Z" fill="#7F77DD"/></svg></div>
+            <span class="thumb-label">Watch on YouTube</span>
+          </div>
+        </div>
+        <div class="work-info">
+          <div class="work-title">Short-form Edit #2</div>
+          <div class="work-meta">YouTube Short · Gaming</div>
+          <div class="work-tag">Short-form</div>
+        </div>
+      </a>
+      <a class="work-card" href="https://youtube.com/shorts/DQxz3CRdz50" target="_blank">
+        <div class="work-thumb">
+          <div class="work-thumb-placeholder">
+            <div class="play-icon"><svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M1 1L13 8L1 15V1Z" fill="#7F77DD"/></svg></div>
+            <span class="thumb-label">Watch on YouTube</span>
+          </div>
+        </div>
+        <div class="work-info">
+          <div class="work-title">Short-form Edit #3</div>
+          <div class="work-meta">YouTube Short · Gaming</div>
+          <div class="work-tag">Short-form</div>
+        </div>
+      </a>
+      <a class="work-card" href="https://youtube.com/shorts/9e_aEdxn3Q0" target="_blank">
+        <div class="work-thumb">
+          <div class="work-thumb-placeholder">
+            <div class="play-icon"><svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M1 1L13 8L1 15V1Z" fill="#7F77DD"/></svg></div>
+            <span class="thumb-label">Watch on YouTube</span>
+          </div>
+        </div>
+        <div class="work-info">
+          <div class="work-title">Short-form Edit #4</div>
+          <div class="work-meta">YouTube Short · Gaming</div>
+          <div class="work-tag">Short-form</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div id="tab-longform" class="tab-panel">
+    <div class="work-grid">
+      <a class="work-card" href="https://youtu.be/FjemmHT0s14" target="_blank">
+        <div class="work-thumb">
+          <div class="work-thumb-placeholder">
+            <div class="play-icon"><svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M1 1L13 8L1 15V1Z" fill="#7F77DD"/></svg></div>
+            <span class="thumb-label">Watch on YouTube</span>
+          </div>
+        </div>
+        <div class="work-info">
+          <div class="work-title">Long-form Edit #1</div>
+          <div class="work-meta">YouTube · Gaming</div>
+          <div class="work-tag">Long-form</div>
+        </div>
+      </a>
+      <a class="work-card" href="https://www.youtube.com/watch?v=O3gdbHtNVNM&t=13s" target="_blank">
+        <div class="work-thumb">
+          <div class="work-thumb-placeholder">
+            <div class="play-icon"><svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M1 1L13 8L1 15V1Z" fill="#7F77DD"/></svg></div>
+            <span class="thumb-label">Watch on YouTube</span>
+          </div>
+        </div>
+        <div class="work-info">
+          <div class="work-title">Long-form Edit #2</div>
+          <div class="work-meta">YouTube · Gaming</div>
+          <div class="work-tag">Long-form</div>
+        </div>
+      </a>
+      <a class="work-card" href="https://youtu.be/zUXRpZL6Zs8" target="_blank">
+        <div class="work-thumb">
+          <div class="work-thumb-placeholder">
+            <div class="play-icon"><svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M1 1L13 8L1 15V1Z" fill="#7F77DD"/></svg></div>
+            <span class="thumb-label">Watch on YouTube</span>
+          </div>
+        </div>
+        <div class="work-info">
+          <div class="work-title">Long-form Edit #3</div>
+          <div class="work-meta">YouTube · Gaming</div>
+          <div class="work-tag">Long-form</div>
+        </div>
+      </a>
+      <a class="work-card" href="https://youtu.be/vBH0ALts5Lk" target="_blank">
+        <div class="work-thumb">
+          <div class="work-thumb-placeholder">
+            <div class="play-icon"><svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M1 1L13 8L1 15V1Z" fill="#7F77DD"/></svg></div>
+            <span class="thumb-label">Watch on YouTube</span>
+          </div>
+        </div>
+        <div class="work-info">
+          <div class="work-title">Long-form Edit #4</div>
+          <div class="work-meta">YouTube · Gaming</div>
+          <div class="work-tag">Long-form</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="about">
+  <div class="section-label">About</div>
+  <div class="about-row">
+    <div class="about-pfp-col">
+      <div class="pfp-frame">
+        <img src="pfp.jpeg" alt="Caliber" />
+      </div>
+      <div class="pfp-name">Caliber</div>
+      <div class="pfp-role">Video Editor</div>
+    </div>
+    <div class="about-text">
+      <p>I'm a freelance video editor focused on gaming content. I do long-form videos and short-form stuff like Shorts and Reels, and I genuinely enjoy making edits that feel good to watch, not just "done."</p>
+      <p>I work in Adobe Premiere Pro and handle everything from the raw footage to the final export. I've worked with 6+ channels so far and I'm always looking to work with creators who actually care about their content.</p>
+      <div class="spec-list">
+        <span class="spec-pill">Adobe Premiere Pro</span>
+        <span class="spec-pill">Long-form Gaming</span>
+        <span class="spec-pill">YouTube Shorts</span>
+        <span class="spec-pill">Instagram Reels</span>
+        <span class="spec-pill">Color Grading</span>
+        <span class="spec-pill">SFX & Music Sync</span>
+      </div>
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-num">6+</div>
+          <div class="stat-label">Channels worked with</div>
+        </div>
+        <div class="ppro-stat">
+          <div class="ppro-logo">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="24" height="24" rx="4" fill="#9999FF"/>
+              <text x="3" y="18" font-family="Georgia, serif" font-size="14" font-weight="700" fill="#1a0030">Pr</text>
+            </svg>
+          </div>
+          <div class="ppro-label">Primary software</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-name">Caliber</div>
+  <div class="footer-note">Video Editor</div>
+</footer>
+
+<script>
+  function switchTab(tab, el) {
+    document.querySelectorAll('.work-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    el.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
